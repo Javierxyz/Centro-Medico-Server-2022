@@ -13,7 +13,7 @@ app.use(cors());
 app.use(express.json());
 
 /**Rutas */
-app.use("/api/auth", require("./routes/auth"));
+app.use("/api/usuario", require("./routes/usuario"));
 
 /**Levantar el servidor */
 app.listen(app.get("port"), () => {
