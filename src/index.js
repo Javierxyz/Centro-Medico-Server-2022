@@ -14,6 +14,7 @@ app.use(express.json());
 
 /**Rutas */
 app.use("/api/usuario", require("./routes/usuario"));
+app.use("/api/box", require("./routes/box"));
 
 /**Levantar el servidor */
 app.listen(app.get("port"), () => {

@@ -113,6 +113,7 @@ const revalidarToken = async (req = request, res = response) => {
   }
 };
 
+/**Obtiene algunos datos los usuarios registrodos */
 const obtenerUsuarios = async (req = request, res = response) => {
   try {
     const usuariosDB = await pool.query("SELECT nombre, apellido, telefono,correo_electronico FROM usuario");

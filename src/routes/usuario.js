@@ -1,9 +1,11 @@
 const express = require("express");
-const { check } = require("express-validator");
-const { validarCampos } = require("../middlewares/validar-campos");
-const { crearUsuario, loginUsuario, revalidarToken, obtenerUsuarios } = require("../controllers/usuario");
-const { validarJWT } = require("../middlewares/validar-jwt");
 const router = express.Router();
+const { check } = require("express-validator");
+
+const { validarCampos } = require("../middlewares/validar-campos");
+const { validarJWT } = require("../middlewares/validar-jwt");
+
+const { crearUsuario, loginUsuario, revalidarToken, obtenerUsuarios } = require("../controllers/usuario");
 
 /**Crear nuevo usuario*/
 router.post(
@@ -30,7 +32,8 @@ router.post(
 
 /**Renovar el token del usuario */
 router.get("/renew", validarJWT, revalidarToken);
-module.exports = router;
 
 /**Obtener todos los usuarios registrados */
 router.get("/", obtenerUsuarios);
+
+module.exports = router;
