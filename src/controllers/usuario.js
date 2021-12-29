@@ -2,19 +2,30 @@ const { response, request } = require("express");
 const bcrypt = require("bcryptjs");
 const pool = require("../database");
 const { generarJWT } = require("../helpers/jwt");
+const { formatearRolUsuario } = require("../helpers/formatear-rol-usuario");
+const { seleccionarInfoUsuario, seleccionarInfoUsuarioPorRut, formatearInfoUsuario } = require("../helpers/formatear-info-usuario");
 
 /**Función que permite ingresar un nuevo usuario en la base de datos.
  * Verifica si el usuario ya está registrado en la base de datos.
  * Cifra la contraseña en la base de datos, utilizando bcrypt.
  */
 const crearUsuario = async (req = request, res = response) => {
+  //Extrae la infomación enviada por el formulario
   const { rut, nombre, apellido, nacimiento, telefono, correo_electronico, sexo } = req.body;
-  console.log(req.body);
+  const { coordinacion, profesional, direccion, administrativo, area_medica, area_administrativa } = req.body;
+
+  //Crea la contraseña y el pin de seguridad
   const fecha_nacimiento = new Date(nacimiento.year, nacimiento.month, nacimiento.day);
   const clave = "cm_" + rut.slice(0, rut.length - 2);
   const pin = Math.floor(Math.random() * 90000) + 10000;
-  const nuevoUsuario = { rut, nombre, apellido, fecha_nacimiento, telefono, clave, correo_electronico, sexo, pin };
 
+  //Objeto que se guardará en la tabla usuario
+  const nuevoUsuario = { rut, nombre, apellido, fecha_nacimiento, telefono, clave, correo_electronico, sexo, pin };
+  console.log(nuevoUsuario);
+  //Objeto que se guardará en la tabla rol
+  let rolTemp = { coordinacion, profesional, direccion, administrativo, area_medica, area_administrativa };
+
+  //Realiza las operaciones para verificar e ingresar un usuario
   try {
     const usuarioDB = await pool.query("SELECT * FROM usuario WHERE rut = ?", [nuevoUsuario.rut]);
     if (usuarioDB[0] === undefined) {
@@ -22,6 +33,9 @@ const crearUsuario = async (req = request, res = response) => {
         const salt = bcrypt.genSaltSync();
         nuevoUsuario.clave = bcrypt.hashSync(clave, salt);
         await pool.query("INSERT INTO usuario SET ?", [nuevoUsuario]);
+        const nuevoRol = await formatearRolUsuario(rut, rolTemp);
+        console.log(nuevoRol);
+        await pool.query("INSERT INTO usuario_roles SET ?", [nuevoRol]);
         return res.json({
           ok: true,
           msg: "Usuario creado de forma satisfactoria.",
@@ -52,10 +66,8 @@ const crearUsuario = async (req = request, res = response) => {
  * Verifica si el usuario existe en el sistema y si la contraseña
  * enviada es la correcta utilizando bcrypt.
  */
-/** TODO: Cambiar los mensajes de error :p */
 const loginUsuario = async (req = request, res = response) => {
   const { rut, clave } = req.body;
-  console.log(rut, clave);
   try {
     let usuarioDB = await pool.query("SELECT * FROM usuario WHERE rut = ?", [rut]);
     if (usuarioDB[0] === undefined) {
@@ -113,20 +125,118 @@ const revalidarToken = async (req = request, res = response) => {
   }
 };
 
-/**Obtiene algunos datos los usuarios registrodos */
+/**Obtiene algunos datos los usuarios registrados */
 const obtenerUsuarios = async (req = request, res = response) => {
   try {
-    const usuariosDB = await pool.query("SELECT nombre, apellido, telefono,correo_electronico FROM usuario");
+    const usuariosDB = await pool.query(seleccionarInfoUsuario());
     console.log(usuariosDB);
-    return res.status(200).json(usuariosDB);
+    return res.json(usuariosDB);
   } catch (error) {
-    console.log(error);
+    return res.status(500).json({
+      ok: false,
+      msg: "Error al buscar todos los usuarios",
+      error,
+    });
   }
 };
 
+/**Obtiene información de un usuario y formatea los datos para su envio */
+const obtenerUsuarioPorRut = async (req = request, res = response) => {
+  const { rut } = req.params;
+  try {
+    const usuarioDB = await pool.query(seleccionarInfoUsuarioPorRut(), [rut]);
+    const usuarioFormateado = await formatearInfoUsuario(usuarioDB[0]);
+    return res.json(usuarioFormateado);
+  } catch (error) {
+    return res.status(500).json({
+      ok: false,
+      msg: "Error al buscar usuario",
+      error,
+    });
+  }
+};
+
+/**Actualiza la información de un usuario */
+const actualizarUsuarioPorRut = async (req = request, res = response) => {
+  const { rut_id } = req.params;
+  const { rut, nombre, apellido, nacimiento, telefono, correo_electronico, sexo } = req.body;
+  const { coordinacion, profesional, direccion, administrativo, area_medica, area_administrativa } = req.body;
+
+  const fecha_nacimiento = new Date(nacimiento.year, nacimiento.month, nacimiento.day);
+  const usuarioActualizado = { rut, nombre, apellido, fecha_nacimiento, telefono, correo_electronico, sexo };
+  let rolTemp = { coordinacion, profesional, direccion, administrativo, area_medica, area_administrativa };
+  const nuevoRol = await formatearRolUsuario(rut, rolTemp);
+  console.log(nuevoRol);
+  try {
+    await pool.query("UPDATE usuario SET ? WHERE rut = ?", [usuarioActualizado, rut_id]);
+    await pool.query("UPDATE usuario_roles SET ? WHERE id_usuario = ?", [nuevoRol, rut_id]);
+    return res.json({
+      ok: true,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      ok: false,
+      msg: "Error al actualizar el usuario",
+      error,
+    });
+  }
+};
+
+const validarPin = async (req = request, res = response) => {
+  const { rut } = req.params;
+  const { pin } = req.body;
+  try {
+    const usuarioDB = await pool.query("SELECT pin from usuario WHERE rut = ?", [rut]);
+    if (usuarioDB[0].pin === parseInt(pin)) {
+      return res.json({
+        ok: true,
+        msg: "Pin válido",
+      });
+    } else {
+      return res.status(400).json({
+        ok: false,
+        msg: "Pin inválido",
+        usuario: usuarioDB[0].pin,
+      });
+    }
+  } catch (error) {
+    return res.status(500).json({
+      ok: false,
+      msg: "Error al momento de buscar usuario",
+      error,
+    });
+  }
+};
+
+const reestablecerCredenciales = async (req = request, res = response) => {
+  const { rut } = req.params;
+  const clave = "cm_" + rut.slice(0, rut.length - 2);
+  const pin = Math.floor(Math.random() * 90000) + 10000;
+  try {
+    const salt = bcrypt.genSaltSync();
+    const clave_hash = bcrypt.hashSync(clave, salt);
+    await pool.query("UPDATE usuario SET clave = ?, pin = ? WHERE rut = ?", [clave_hash, pin, rut]);
+    // const credenciales = { clave, pin };
+    return res.json({
+      clave,
+      pin,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      ok: false,
+      msg: "Error al momento de buscar usuario",
+      error,
+    });
+  }
+};
 module.exports = {
   crearUsuario,
   loginUsuario,
   revalidarToken,
   obtenerUsuarios,
+  obtenerUsuarioPorRut,
+  actualizarUsuarioPorRut,
+  validarPin,
+  reestablecerCredenciales,
 };

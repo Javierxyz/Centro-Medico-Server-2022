@@ -5,7 +5,16 @@ const { check } = require("express-validator");
 const { validarCampos } = require("../middlewares/validar-campos");
 const { validarJWT } = require("../middlewares/validar-jwt");
 
-const { crearUsuario, loginUsuario, revalidarToken, obtenerUsuarios } = require("../controllers/usuario");
+const {
+  crearUsuario,
+  loginUsuario,
+  revalidarToken,
+  obtenerUsuarios,
+  obtenerUsuarioPorRut,
+  actualizarUsuarioPorRut,
+  validarPin,
+  reestablecerCredenciales,
+} = require("../controllers/usuario");
 
 /**Crear nuevo usuario*/
 router.post(
@@ -36,4 +45,28 @@ router.get("/renew", validarJWT, revalidarToken);
 /**Obtener todos los usuarios registrados */
 router.get("/", obtenerUsuarios);
 
+/**Obtener usuarios por un identificador (Rut) */
+router.get("/:rut", obtenerUsuarioPorRut);
+
+/**Actualizar información de usuario (Rut) */
+router.put(
+  "/update/:rut_id",
+  [
+    check("rut", "El rut es obligarotio").not().isEmpty(),
+    check("nombre", "El nombre es obligatorio").not().isEmpty(),
+    check("apellido", "El apellido es obligatorio").not().isEmpty(),
+    check("nacimiento", "El email es obligatorio").not().isEmpty(),
+    check("telefono", "El email es obligatorio").not().isEmpty(),
+    check("correo_electronico", "El email es obligatorio").not().isEmpty(),
+    check("sexo", "El email es obligatorio").not().isEmpty(),
+    validarCampos,
+  ],
+  actualizarUsuarioPorRut
+);
+
+/**Validar pin*/
+router.post("/validar/:rut", [check("pin", "El PIN es obligatorio").not().isEmpty()], validarPin);
+
+/**Reestablecer credenciales */
+router.get("/reestablecer/:rut", reestablecerCredenciales);
 module.exports = router;

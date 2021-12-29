@@ -16,8 +16,10 @@ pool.getConnection((err, con) => {
       console.error("La conexión con la base de datos fue rechazada");
     }
   }
-  if (con) con.release();
-  console.log("Base de datos conectada");
+  if (con) {
+    con.release();
+    console.log("Base de datos conectada");
+  }
   return;
 });
 
