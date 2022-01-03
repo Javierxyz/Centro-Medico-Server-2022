@@ -19,5 +19,6 @@ app.use("/api/paciente", require("./routes/paciente"));
 
 /**Levantar el servidor */
 app.listen(app.get("port"), () => {
+  console.log("\x1b[36m%s\x1b[0m", "Back end del sistema del centro medico");
   console.log("Escuchando el servidor desde el puerto: ", app.get("port"));
 });

@@ -15,13 +15,12 @@ const crearUsuario = async (req = request, res = response) => {
   const { coordinacion, profesional, direccion, administrativo, area_medica, area_administrativa } = req.body;
 
   //Crea la contraseña y el pin de seguridad
-  const fecha_nacimiento = new Date(nacimiento.year, nacimiento.month, nacimiento.day);
+  const fecha_nacimiento = new Date(nacimiento.year, nacimiento.month - 1, nacimiento.day);
   const clave = "cm_" + rut.slice(0, rut.length - 2);
   const pin = Math.floor(Math.random() * 90000) + 10000;
 
   //Objeto que se guardará en la tabla usuario
   const nuevoUsuario = { rut, nombre, apellido, fecha_nacimiento, telefono, clave, correo_electronico, sexo, pin };
-  console.log(nuevoUsuario);
   //Objeto que se guardará en la tabla rol
   let rolTemp = { coordinacion, profesional, direccion, administrativo, area_medica, area_administrativa };
 
@@ -34,7 +33,6 @@ const crearUsuario = async (req = request, res = response) => {
         nuevoUsuario.clave = bcrypt.hashSync(clave, salt);
         await pool.query("INSERT INTO usuario SET ?", [nuevoUsuario]);
         const nuevoRol = await formatearRolUsuario(rut, rolTemp);
-        console.log(nuevoRol);
         await pool.query("INSERT INTO usuario_roles SET ?", [nuevoRol]);
         return res.json({
           ok: true,
@@ -76,7 +74,6 @@ const loginUsuario = async (req = request, res = response) => {
         msg: "El usuario no existe",
       });
     }
-    console.log(usuarioDB[0]);
     const passwordValida = bcrypt.compareSync(clave, usuarioDB[0].clave);
     if (!passwordValida) {
       return res.status(400).json({
@@ -129,7 +126,6 @@ const revalidarToken = async (req = request, res = response) => {
 const obtenerUsuarios = async (req = request, res = response) => {
   try {
     const usuariosDB = await pool.query(seleccionarInfoUsuario());
-    console.log(usuariosDB);
     return res.json(usuariosDB);
   } catch (error) {
     return res.status(500).json({
@@ -142,7 +138,8 @@ const obtenerUsuarios = async (req = request, res = response) => {
 
 /**Obtiene información de un usuario y formatea los datos para su envio */
 const obtenerUsuarioPorRut = async (req = request, res = response) => {
-  const { rut } = req.params;
+  const rut = req.params.rut;
+  console.log(rut);
   try {
     const usuarioDB = await pool.query(seleccionarInfoUsuarioPorRut(), [rut]);
     const usuarioFormateado = await formatearInfoUsuario(usuarioDB[0]);
@@ -159,14 +156,14 @@ const obtenerUsuarioPorRut = async (req = request, res = response) => {
 /**Actualiza la información de un usuario */
 const actualizarUsuarioPorRut = async (req = request, res = response) => {
   const { rut_id } = req.params;
+  console.log(rut_id);
   const { rut, nombre, apellido, nacimiento, telefono, correo_electronico, sexo } = req.body;
   const { coordinacion, profesional, direccion, administrativo, area_medica, area_administrativa } = req.body;
 
-  const fecha_nacimiento = new Date(nacimiento.year, nacimiento.month, nacimiento.day);
+  const fecha_nacimiento = new Date(nacimiento.year, nacimiento.month - 1, nacimiento.day);
   const usuarioActualizado = { rut, nombre, apellido, fecha_nacimiento, telefono, correo_electronico, sexo };
   let rolTemp = { coordinacion, profesional, direccion, administrativo, area_medica, area_administrativa };
   const nuevoRol = await formatearRolUsuario(rut, rolTemp);
-  console.log(nuevoRol);
   try {
     await pool.query("UPDATE usuario SET ? WHERE rut = ?", [usuarioActualizado, rut_id]);
     await pool.query("UPDATE usuario_roles SET ? WHERE id_usuario = ?", [nuevoRol, rut_id]);

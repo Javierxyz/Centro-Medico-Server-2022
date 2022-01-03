@@ -1,10 +1,15 @@
 const { response, request } = require("express");
 const pool = require("../database");
 
+/**Crea el registro de un nuevo paciente a la base de datos */
 const crearPaciente = async (req = request, res = response) => {
   const nuevoPaciente = { ...req.body };
   console.log(nuevoPaciente);
-  const fecha_nacimiento = new Date(nuevoPaciente.fecha_nacimiento.year, nuevoPaciente.fecha_nacimiento.month, nuevoPaciente.fecha_nacimiento.day);
+  const fecha_nacimiento = new Date(
+    nuevoPaciente.fecha_nacimiento.year,
+    nuevoPaciente.fecha_nacimiento.month - 1,
+    nuevoPaciente.fecha_nacimiento.day
+  );
   nuevoPaciente.fecha_nacimiento = fecha_nacimiento;
   try {
     const pacienteBD = await pool.query("SELECT * FROM paciente WHERE rut = ?", [nuevoPaciente.rut]);
@@ -32,6 +37,58 @@ const crearPaciente = async (req = request, res = response) => {
   return res.json(nuevoPaciente);
 };
 
+/**Obtiene la información relacionada de todos los pacientes */
+const obtenerPacientes = async (req = request, res = response) => {
+  try {
+    const pacientesBD = await pool.query("SELECT * FROM paciente");
+    res.json(pacientesBD);
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      ok: false,
+      msg: "Algo salió mal en la obtención de pacientes",
+      error,
+    });
+  }
+};
+
+/**Obtiene la información de un paciente */
+const obtenerPacientePorRut = async (req = request, res = response) => {
+  const rut = req.params.rut;
+  try {
+    const pacienteBD = await pool.query("SELECT * FROM paciente WHERE rut = ?", [rut]);
+    res.json(pacienteBD[0]);
+  } catch (error) {
+    return res.status(500).json({
+      ok: false,
+      msg: "Algo salió mal en la obtención del paciente",
+      error,
+    });
+  }
+};
+
+const actualizarPacientePorRut = async (req = request, res = response) => {
+  const rut = req.params.rut;
+  const { fecha_nacimiento, ...pacienteActualizado } = req.body;
+  pacienteActualizado.fecha_nacimiento = new Date(fecha_nacimiento.year, fecha_nacimiento.month - 1, fecha_nacimiento.day);
+  try {
+    await pool.query("UPDATE paciente SET ? WHERE rut = ?", [pacienteActualizado, rut]);
+    res.json({
+      ok: true,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      ok: false,
+      msg: "Error al actualizar el paciente",
+      error,
+    });
+  }
+};
+/**Actualizar paciente */
 module.exports = {
   crearPaciente,
+  obtenerPacientes,
+  obtenerPacientePorRut,
+  actualizarPacientePorRut,
 };

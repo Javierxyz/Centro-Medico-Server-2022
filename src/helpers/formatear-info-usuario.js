@@ -38,14 +38,16 @@ const formatearInfoUsuario = (usuario) => {
 
   const arrayAdministrativo = ["recepcion", "farmacia"];
 
+  nacimientoTemp = toString(usuario.fecha_nacimiento);
+
   const usuarioReturn = {
     rut: usuario.rut,
     nombre: usuario.nombre,
     apellido: usuario.apellido,
     nacimiento: {
-      year: 1993,
-      month: 11,
-      day: 29,
+      year: usuario.fecha_nacimiento.getFullYear(),
+      month: usuario.fecha_nacimiento.getMonth() + 1,
+      day: usuario.fecha_nacimiento.getDate(),
     },
     sexo: usuario.sexo,
     correo_electronico: usuario.correo_electronico,
@@ -58,8 +60,6 @@ const formatearInfoUsuario = (usuario) => {
     area_administrativa: [],
   };
 
-  console.log(usuario.nacimiento);
-
   arrayMedica.map((item) => {
     if (usuario[item] === 1) usuarioReturn.area_medica.push(item);
   });
@@ -67,7 +67,6 @@ const formatearInfoUsuario = (usuario) => {
   arrayAdministrativo.map((item) => {
     if (usuario[item] === 1) usuarioReturn.area_administrativa.push(item);
   });
-
   console.log(usuarioReturn);
   return usuarioReturn;
 };

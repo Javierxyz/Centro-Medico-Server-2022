@@ -49,20 +49,7 @@ router.get("/", obtenerUsuarios);
 router.get("/:rut", obtenerUsuarioPorRut);
 
 /**Actualizar información de usuario (Rut) */
-router.put(
-  "/update/:rut_id",
-  [
-    check("rut", "El rut es obligarotio").not().isEmpty(),
-    check("nombre", "El nombre es obligatorio").not().isEmpty(),
-    check("apellido", "El apellido es obligatorio").not().isEmpty(),
-    check("nacimiento", "El email es obligatorio").not().isEmpty(),
-    check("telefono", "El email es obligatorio").not().isEmpty(),
-    check("correo_electronico", "El email es obligatorio").not().isEmpty(),
-    check("sexo", "El email es obligatorio").not().isEmpty(),
-    validarCampos,
-  ],
-  actualizarUsuarioPorRut
-);
+router.put("/:rut_id", actualizarUsuarioPorRut);
 
 /**Validar pin*/
 router.post("/validar/:rut", [check("pin", "El PIN es obligatorio").not().isEmpty()], validarPin);
