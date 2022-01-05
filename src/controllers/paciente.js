@@ -4,13 +4,13 @@ const pool = require("../database");
 /**Crea el registro de un nuevo paciente a la base de datos */
 const crearPaciente = async (req = request, res = response) => {
   const nuevoPaciente = { ...req.body };
-  console.log(nuevoPaciente);
   const fecha_nacimiento = new Date(
     nuevoPaciente.fecha_nacimiento.year,
     nuevoPaciente.fecha_nacimiento.month - 1,
     nuevoPaciente.fecha_nacimiento.day
   );
   nuevoPaciente.fecha_nacimiento = fecha_nacimiento;
+  console.log(nuevoPaciente);
   try {
     const pacienteBD = await pool.query("SELECT * FROM paciente WHERE rut = ?", [nuevoPaciente.rut]);
     if (pacienteBD[0] === undefined) {
@@ -67,6 +67,7 @@ const obtenerPacientePorRut = async (req = request, res = response) => {
   }
 };
 
+/**Actualizar paciente */
 const actualizarPacientePorRut = async (req = request, res = response) => {
   const rut = req.params.rut;
   const { fecha_nacimiento, ...pacienteActualizado } = req.body;
@@ -85,7 +86,6 @@ const actualizarPacientePorRut = async (req = request, res = response) => {
     });
   }
 };
-/**Actualizar paciente */
 module.exports = {
   crearPaciente,
   obtenerPacientes,
