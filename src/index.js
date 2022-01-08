@@ -17,6 +17,7 @@ app.use("/api/usuario", require("./routes/usuario"));
 app.use("/api/box", require("./routes/box"));
 app.use("/api/paciente", require("./routes/paciente"));
 app.use("/api/cita", require("./routes/cita"));
+app.use("/api/estadistica", require("./routes/estadistica"));
 
 /**Levantar el servidor */
 app.listen(app.get("port"), () => {

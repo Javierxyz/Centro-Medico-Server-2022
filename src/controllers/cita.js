@@ -2,7 +2,7 @@ const { response, request } = require("express");
 const pool = require("../database");
 
 const { calcularEdad } = require("../helpers/calcular-edad");
-const { joinDatosTablaCitas, joinDatosFormulario } = require("../helpers/queries");
+const { joinDatosTablaCitas, joinDatosFormulario, joinTablaCitasEstados } = require("../helpers/queries");
 
 const crearCitas = async (req = request, res = response) => {
   const nuevaCita = { ...req.body };
@@ -50,6 +50,13 @@ const obtenerCitasPorFecha = async (req = request, res = response) => {
 
 const actualizarCitasPorId = async (req = request, res = response) => {
   const { id_consulta, hora, lugar_atencion } = req.body;
+  console.log(req.body);
+  if (id_consulta === "") {
+    return res.status(500).json({
+      ok: false,
+      msg: "Error, seleccione una cita",
+    });
+  }
   try {
     await pool.query("UPDATE consulta SET hora = ?, lugar_atencion = ? WHERE id_consulta = ?", [hora, lugar_atencion, id_consulta]);
     return res.json({
@@ -60,7 +67,7 @@ const actualizarCitasPorId = async (req = request, res = response) => {
     console.log(error);
     return res.status(500).json({
       ok: false,
-      msg: "Error al actualizar el paciente",
+      msg: "Error al actualizar la cita",
       error,
     });
   }
@@ -71,11 +78,44 @@ const obtenerCitaPorHorario = async (req = request, res = response) => {
   const consulta = joinDatosFormulario(fecha, hora, id_lugar);
   try {
     const citaDB = await pool.query(consulta);
-    return res.json(citaDB);
+    return res.json(citaDB[0]);
   } catch (error) {
     return res.status(500).json({
       ok: false,
       msg: "Error al obtener la cita",
+      error,
+    });
+  }
+};
+
+const estadisticaCitas = async (req = request, res = response) => {
+  try {
+    const estadistica = { cantidad_citas: 0, cantidad_paciente: 0 };
+    const citasDB = await pool.query("SELECT COUNT(c.id_consulta) 'cantidad_citas' FROM consulta c");
+    const pacientesDB = await pool.query("SELECT COUNT(p.id_paciente) 'cantidad_pacientes' FROM paciente p");
+    estadistica.cantidad_citas = citasDB[0].cantidad_citas;
+    estadistica.cantidad_pacientes = pacientesDB[0].cantidad_pacientes;
+    return res.json(estadistica);
+  } catch (error) {
+    return res.status(500).json({
+      ok: false,
+      msg: "Error al obtener las cantidades",
+      error,
+    });
+  }
+};
+
+const obtenerCitasConEstado = async (req = request, res = response) => {
+  const fecha = req.params.fecha;
+  console.log(fecha);
+  try {
+    const consulta = await joinTablaCitasEstados(fecha);
+    const citasBD = await pool.query(consulta);
+    return res.json(citasBD);
+  } catch (error) {
+    return res.status(500).json({
+      ok: false,
+      msg: "Error al obtener datos de las citas",
       error,
     });
   }
@@ -85,4 +125,6 @@ module.exports = {
   obtenerCitasPorFecha,
   actualizarCitasPorId,
   obtenerCitaPorHorario,
+  estadisticaCitas,
+  obtenerCitasConEstado,
 };
