@@ -8,8 +8,6 @@ const arrayMedicina = [
   "psiquiatria",
   "nutricion",
   "matroneria",
-  "enfermeria",
-  "tens",
   "tec_medica",
   "radiologia",
   "kinesiologia",

@@ -48,7 +48,7 @@ const obtenerCitasPorFecha = async (req = request, res = response) => {
   }
 };
 
-const actualizarCitasPorId = async (req = request, res = response) => {
+const agendarCitasPorId = async (req = request, res = response) => {
   const { id_consulta, hora, lugar_atencion } = req.body;
   console.log(req.body);
   if (id_consulta === "") {
@@ -58,7 +58,11 @@ const actualizarCitasPorId = async (req = request, res = response) => {
     });
   }
   try {
-    await pool.query("UPDATE consulta SET hora = ?, lugar_atencion = ? WHERE id_consulta = ?", [hora, lugar_atencion, id_consulta]);
+    await pool.query("UPDATE consulta SET hora = ?, lugar_atencion = ?, estado = 'agendada' WHERE id_consulta = ?", [
+      hora,
+      lugar_atencion,
+      id_consulta,
+    ]);
     return res.json({
       ok: true,
       msg: "Cita actualizada con éxito",
@@ -120,11 +124,49 @@ const obtenerCitasConEstado = async (req = request, res = response) => {
     });
   }
 };
+
+const confirmarCita = async (req = request, res = response) => {
+  const { id_consulta, confirmada } = req.body;
+  console.log(id_consulta, confirmada);
+  try {
+    await pool.query("UPDATE consulta SET confirmada = ? WHERE id_consulta = ?", [confirmada, id_consulta]);
+    return res.json({
+      ok: true,
+      msg: "Confirmación actualizada de forma satisfactoria.",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      ok: false,
+      msg: "Error al momento de actualizar cita",
+      error,
+    });
+  }
+};
+
+const confirmarAsistencia = async (req = request, res = response) => {
+  const { id_consulta, estado } = req.body;
+  console.log(id_consulta, estado);
+  try {
+    await pool.query("UPDATE consulta SET estado = ? WHERE id_consulta = ?", [estado, id_consulta]);
+    return res.json({
+      ok: true,
+      msg: "Asistencia actualizada de forma satisfactoria.",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      ok: false,
+      msg: "Error al momento de actualizar cita",
+      error,
+    });
+  }
+};
 module.exports = {
   crearCitas,
   obtenerCitasPorFecha,
-  actualizarCitasPorId,
+  agendarCitasPorId,
   obtenerCitaPorHorario,
   estadisticaCitas,
   obtenerCitasConEstado,
+  confirmarCita,
+  confirmarAsistencia,
 };

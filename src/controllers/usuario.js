@@ -218,7 +218,8 @@ const reestablecerCredenciales = async (req = request, res = response) => {
   try {
     const salt = bcrypt.genSaltSync();
     const clave_hash = bcrypt.hashSync(clave, salt);
-    await pool.query("UPDATE usuario SET clave = ?, pin = ? WHERE rut = ?", [clave_hash, pin, rut]);
+    const resBD = await pool.query("UPDATE usuario SET clave = ?, pin = ? WHERE rut = ?", [clave_hash, pin, rut]);
+    console.log(resBD);
     // const credenciales = { clave, pin };
     return res.json({
       clave,

@@ -12,10 +12,10 @@ const crearPaciente = async (req = request, res = response) => {
   nuevoPaciente.fecha_nacimiento = fecha_nacimiento;
   console.log(nuevoPaciente);
   try {
-    const pacienteBD = await pool.query("SELECT * FROM paciente WHERE rut = ?", [nuevoPaciente.rut]);
+    const pacienteBD = await pool.query("SELECT * FROM pacientes WHERE rut = ?", [nuevoPaciente.rut]);
     if (pacienteBD[0] === undefined) {
       try {
-        await pool.query("INSERT INTO paciente SET ?", [nuevoPaciente]);
+        await pool.query("INSERT INTO pacientes SET ?", [nuevoPaciente]);
         return res.json({
           ok: true,
           msg: "Paciente creado de forma satisfactoria.",
@@ -40,7 +40,7 @@ const crearPaciente = async (req = request, res = response) => {
 /**Obtiene la información relacionada de todos los pacientes */
 const obtenerPacientes = async (req = request, res = response) => {
   try {
-    const pacientesBD = await pool.query("SELECT * FROM paciente");
+    const pacientesBD = await pool.query("SELECT * FROM pacientes");
     res.json(pacientesBD);
   } catch (error) {
     console.log(error);
@@ -56,7 +56,7 @@ const obtenerPacientes = async (req = request, res = response) => {
 const obtenerPacientePorRut = async (req = request, res = response) => {
   const rut = req.params.rut;
   try {
-    const pacienteBD = await pool.query("SELECT * FROM paciente WHERE rut = ?", [rut]);
+    const pacienteBD = await pool.query("SELECT * FROM pacientes WHERE rut = ?", [rut]);
     res.json(pacienteBD[0]);
   } catch (error) {
     return res.status(500).json({
@@ -73,7 +73,7 @@ const actualizarPacientePorRut = async (req = request, res = response) => {
   const { fecha_nacimiento, ...pacienteActualizado } = req.body;
   pacienteActualizado.fecha_nacimiento = new Date(fecha_nacimiento.year, fecha_nacimiento.month - 1, fecha_nacimiento.day);
   try {
-    await pool.query("UPDATE paciente SET ? WHERE rut = ?", [pacienteActualizado, rut]);
+    await pool.query("UPDATE pacientes SET ? WHERE rut = ?", [pacienteActualizado, rut]);
     res.json({
       ok: true,
     });
