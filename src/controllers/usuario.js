@@ -4,6 +4,7 @@ const pool = require("../database");
 const { generarJWT } = require("../helpers/jwt");
 const { formatearRolUsuario } = require("../helpers/formatear-rol-usuario");
 const { seleccionarInfoUsuario, seleccionarInfoUsuarioPorRut, formatearInfoUsuario } = require("../helpers/formatear-info-usuario");
+const { seleccionarRoles } = require("../helpers/seleccionar-roles");
 
 /**Función que permite ingresar un nuevo usuario en la base de datos.
  * Verifica si el usuario ya está registrado en la base de datos.
@@ -74,6 +75,7 @@ const loginUsuario = async (req = request, res = response) => {
         msg: "El usuario no existe",
       });
     }
+
     const passwordValida = bcrypt.compareSync(clave, usuarioDB[0].clave);
     if (!passwordValida) {
       return res.status(400).json({
@@ -81,6 +83,9 @@ const loginUsuario = async (req = request, res = response) => {
         msg: "La contraseña no es la correcta",
       });
     }
+
+    const usuarioRolDB = await pool.query("SELECT * FROM usuario_roles WHERE id_usuario = ?", [rut]);
+    const usuarioRoles = await seleccionarRoles(usuarioRolDB[0]);
     const token = await generarJWT(usuarioDB[0].rut, usuarioDB[0].nombre);
     return res.json({
       ok: true,
@@ -88,7 +93,7 @@ const loginUsuario = async (req = request, res = response) => {
       rut: usuarioDB[0].rut,
       nombre: usuarioDB[0].nombre,
       apellido: usuarioDB[0].apellido,
-      rol: usuarioDB[0].rol,
+      rol: usuarioRoles,
       token: token,
     });
   } catch (error) {
@@ -227,6 +232,35 @@ const reestablecerCredenciales = async (req = request, res = response) => {
     });
   }
 };
+
+/**Cambiar contraseña */
+const cambiarPassword = async (req = request, res = response) => {
+  const rut = req.params.rut;
+  const { passwordVieja, passwordNueva } = req.body;
+  try {
+    usuarioDB = await pool.query("SELECT * FROM usuario WHERE rut = ?", [rut]);
+    const passwordValida = bcrypt.compareSync(passwordVieja, usuarioDB[0].clave);
+    if (!passwordValida) {
+      return res.status(400).json({
+        ok: false,
+        msg: "La contraseña no es la correcta",
+      });
+    }
+    const salt = bcrypt.genSaltSync();
+    const passwordHash = bcrypt.hashSync(passwordNueva, salt);
+    await pool.query("UPDATE usuario SET clave = ? WHERE rut = ?", [passwordHash, rut]);
+    return res.json({
+      ok: true,
+      msg: "Contraseña modificada de forma satisfactoria",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      ok: false,
+      msg: "Algo salió mal en la creación del usuario",
+    });
+  }
+};
+
 module.exports = {
   crearUsuario,
   loginUsuario,
@@ -236,4 +270,5 @@ module.exports = {
   actualizarUsuarioPorRut,
   validarPin,
   reestablecerCredenciales,
+  cambiarPassword,
 };

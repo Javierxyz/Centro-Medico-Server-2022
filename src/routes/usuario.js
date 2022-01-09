@@ -13,7 +13,7 @@ const {
   obtenerUsuarioPorRut,
   actualizarUsuarioPorRut,
   validarPin,
-  reestablecerCredenciales,
+  cambiarPassword,
 } = require("../controllers/usuario");
 
 /**Crear nuevo usuario*/
@@ -55,5 +55,5 @@ router.put("/:rut_id", actualizarUsuarioPorRut);
 router.post("/validar/:rut", [check("pin", "El PIN es obligatorio").not().isEmpty()], validarPin);
 
 /**Reestablecer credenciales */
-router.get("/reestablecer/:rut", reestablecerCredenciales);
+router.put("/reestablecer/:rut", cambiarPassword);
 module.exports = router;

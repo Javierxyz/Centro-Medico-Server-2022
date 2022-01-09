@@ -86,6 +86,7 @@ const actualizarPacientePorRut = async (req = request, res = response) => {
     });
   }
 };
+
 module.exports = {
   crearPaciente,
   obtenerPacientes,

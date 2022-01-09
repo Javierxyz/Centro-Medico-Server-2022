@@ -18,6 +18,7 @@ app.use("/api/box", require("./routes/box"));
 app.use("/api/paciente", require("./routes/paciente"));
 app.use("/api/cita", require("./routes/cita"));
 app.use("/api/estadistica", require("./routes/estadistica"));
+app.use("/api/territorio", require("./routes/territorio"));
 
 /**Levantar el servidor */
 app.listen(app.get("port"), () => {
