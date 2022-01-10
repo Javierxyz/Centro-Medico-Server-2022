@@ -5,10 +5,12 @@ const { calcularEdad } = require("../helpers/calcular-edad");
 const { joinDatosTablaCitas, joinDatosFormulario, joinTablaCitasEstados } = require("../helpers/queries");
 
 const crearCitas = async (req = request, res = response) => {
-  const nuevaCita = { ...req.body };
-  if (nuevaCita.id_paciente.id_paciente !== undefined) {
-    nuevaCita.edad_paciente = calcularEdad(nuevaCita.id_paciente.fecha_nacimiento.slice(0, 10));
-    nuevaCita.id_paciente = nuevaCita.id_paciente.rut;
+  const { fecha, area_medica, hora, id_usuario_recepcion, id_usuario_atencion, tipo, estado, ...paciente } = req.body;
+  let edad_paciente;
+  let id_paciente;
+  if (paciente.id_paciente.id_paciente !== undefined) {
+    edad_paciente = calcularEdad(paciente.id_paciente.fecha_nacimiento.slice(0, 10));
+    id_paciente = paciente.id_paciente.rut;
   } else {
     return res.status(500).json({
       ok: false,
@@ -16,6 +18,7 @@ const crearCitas = async (req = request, res = response) => {
       error,
     });
   }
+  nuevaCita = { fecha, area_medica, hora, id_usuario_atencion, id_usuario_recepcion, tipo, estado, edad_paciente, id_paciente };
   try {
     await pool.query("INSERT INTO consulta SET ?", [nuevaCita]);
     return res.json({
@@ -96,7 +99,7 @@ const estadisticaCitas = async (req = request, res = response) => {
   try {
     const estadistica = { cantidad_citas: 0, cantidad_paciente: 0 };
     const citasDB = await pool.query("SELECT COUNT(c.id_consulta) 'cantidad_citas' FROM consulta c");
-    const pacientesDB = await pool.query("SELECT COUNT(p.id_paciente) 'cantidad_pacientes' FROM paciente p");
+    const pacientesDB = await pool.query("SELECT COUNT(p.id_paciente) 'cantidad_pacientes' FROM pacientes p");
     estadistica.cantidad_citas = citasDB[0].cantidad_citas;
     estadistica.cantidad_pacientes = pacientesDB[0].cantidad_pacientes;
     return res.json(estadistica);
