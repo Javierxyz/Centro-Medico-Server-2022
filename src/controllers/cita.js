@@ -2,7 +2,7 @@ const { response, request } = require("express");
 const pool = require("../database");
 
 const { calcularEdad } = require("../helpers/calcular-edad");
-const { joinDatosTablaCitas, joinDatosFormulario, joinTablaCitasEstados } = require("../helpers/queries");
+const { joinDatosTablaCitas, joinDatosFormulario, joinTablaCitasEstados, joinTablaSignosVitales } = require("../helpers/queries");
 
 const crearCitas = async (req = request, res = response) => {
   const { fecha, area_medica, hora, id_usuario_recepcion, id_usuario_atencion, tipo, estado, ...paciente } = req.body;
@@ -114,15 +114,31 @@ const estadisticaCitas = async (req = request, res = response) => {
 
 const obtenerCitasConEstado = async (req = request, res = response) => {
   const fecha = req.params.fecha;
-  console.log(fecha);
   try {
     const consulta = await joinTablaCitasEstados(fecha);
     const citasBD = await pool.query(consulta);
+    console.log(citasBD);
     return res.json(citasBD);
   } catch (error) {
     return res.status(500).json({
       ok: false,
       msg: "Error al obtener datos de las citas",
+      error,
+    });
+  }
+};
+
+const obtenerCitasPorZonaFecha = async (req = request, res = response) => {
+  const { zona, fecha } = req.params;
+  console.log(zona, fecha);
+  try {
+    const consulta = await joinTablaSignosVitales(fecha, zona);
+    const citasBD = await pool.query(consulta);
+    return res.json(citasBD);
+  } catch (error) {
+    return res.status(500).json({
+      ok: false,
+      msg: "Error al obtener datos de las citas por zona y fecha",
       error,
     });
   }
@@ -163,6 +179,21 @@ const confirmarAsistencia = async (req = request, res = response) => {
     });
   }
 };
+
+const obtenerCitaPorId = async (req = request, res = response) => {
+  const { id_consulta } = req.body;
+  try {
+    const citaBD = await pool.query("SELECT * FROM consulta c WHERE c.id_consulta = ?", [id_consulta]);
+    return res.json(citaBD);
+  } catch (error) {
+    return res.status(500).json({
+      ok: false,
+      msg: "Error al momento de obtener la cita",
+      error,
+    });
+  }
+};
+
 module.exports = {
   crearCitas,
   obtenerCitasPorFecha,
@@ -172,4 +203,6 @@ module.exports = {
   obtenerCitasConEstado,
   confirmarCita,
   confirmarAsistencia,
+  obtenerCitasPorZonaFecha,
+  obtenerCitaPorId,
 };

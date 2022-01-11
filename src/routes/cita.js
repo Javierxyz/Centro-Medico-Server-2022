@@ -10,6 +10,8 @@ const {
   obtenerCitasConEstado,
   confirmarCita,
   confirmarAsistencia,
+  obtenerCitasPorZonaFecha,
+  obtenerCitaPorId,
 } = require("../controllers/cita");
 
 /**Crear paciente */
@@ -27,11 +29,17 @@ router.put("/confirmar", confirmarCita);
 /**Cambia estado desde la recepcion a "Asistida" */
 router.put("/asistida", confirmarAsistencia);
 
+/**Obtener cita por ID */
+router.get("/id/:cita_id", obtenerCitaPorId);
+
 /**Obtener citas durante una fecha determinada */
 router.get("/:fecha", obtenerCitasPorFecha);
 
 /**Obtener citas durante una fecha determinada */
 router.get("/:fecha/estado", obtenerCitasConEstado);
+
+/**Obtener citas por zona y fecha */
+router.get("/:fecha/:zona", obtenerCitasPorZonaFecha);
 
 /**Obtiene la cita por hora, fecha e id del Box */
 router.get("/:hora/:fecha/:id_lugar", obtenerCitaPorHorario);

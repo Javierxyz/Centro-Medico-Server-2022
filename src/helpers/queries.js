@@ -22,8 +22,20 @@ const joinTablaCitasEstados = (fecha) => {
     FROM consulta c, pacientes p, usuario u, area_medica am
     WHERE (c.id_paciente = p.rut) and (c.id_usuario_atencion = u.rut) and (c.fecha = '${fecha}') and (c.area_medica = am.id)`;
 };
+
+const joinTablaSignosVitales = async (fecha, zona) => {
+  return `
+ SELECT p.rut ,v.id_consulta, CONCAT(p.nombre," ",p.apellido) as "nombre_paciente", p.sexo, p.genero, p.nombre_social, v.edad_paciente, v.valor, v.csv, v.nro_box 
+ FROM pacientes p, (
+    SELECT c.id_consulta, c.id_paciente, c.edad_paciente, am.valor, c.csv, l.nro_box 
+    FROM consulta c, lugar l, area_medica am 
+    WHERE c.fecha = '${fecha}' and c.lugar_atencion = l.id_lugar and l.zona = '${zona}' and am.id = c.area_medica and c.estado = "asistida") v 
+ WHERE p.rut = v.id_paciente 
+ `;
+};
 module.exports = {
   joinDatosTablaCitas,
   joinDatosFormulario,
   joinTablaCitasEstados,
+  joinTablaSignosVitales,
 };
