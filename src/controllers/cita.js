@@ -134,6 +134,7 @@ const obtenerCitasPorZonaFecha = async (req = request, res = response) => {
   try {
     const consulta = await joinTablaSignosVitales(fecha, zona);
     const citasBD = await pool.query(consulta);
+    console.log(citasBD);
     return res.json(citasBD);
   } catch (error) {
     return res.status(500).json({

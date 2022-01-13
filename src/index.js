@@ -32,6 +32,7 @@ app.use("/api/cita", require("./routes/cita"));
 app.use("/api/estadistica", require("./routes/estadistica"));
 app.use("/api/territorio", require("./routes/territorio"));
 app.use("/api/signosvitales", require("./routes/signos-vitales"));
+app.use("/api/medicina", require("./routes/medicina"));
 
 /**Levantar el servidor */
 app.listen(app.get("port"), () => {

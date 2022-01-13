@@ -33,9 +33,18 @@ const joinTablaSignosVitales = async (fecha, zona) => {
  WHERE p.rut = v.id_paciente 
  `;
 };
+
+const joinTablaMedicina = async (id_usuario_atencion, fecha) => {
+  return `
+    SELECT concat(p.nombre, p.apellido) "nombre_paciente",p.nombre_social,p.rut,c.hora,c.estado 
+    FROM consulta c, pacientes p 
+    WHERE c.id_usuario_atencion = '${id_usuario_atencion}' and c.fecha = '${fecha}' and c.id_paciente = p.rut 
+  `;
+};
 module.exports = {
   joinDatosTablaCitas,
   joinDatosFormulario,
   joinTablaCitasEstados,
   joinTablaSignosVitales,
+  joinTablaMedicina,
 };
