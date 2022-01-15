@@ -28,7 +28,7 @@ const crearSignosVitales = async (req = request, res = response) => {
   }
 };
 
-const obtenerSignosVitales = async (req = request, res = response) => {
+const obtenerSignosVitalesPorConsulta = async (req = request, res = response) => {
   const idConsulta = req.params.id_consulta;
   try {
     const signosVitalesDB = await pool.query("SELECT * FROM signosvitales WHERE id_consulta = ?", [idConsulta]);
@@ -36,13 +36,33 @@ const obtenerSignosVitales = async (req = request, res = response) => {
   } catch (error) {
     return res.status(500).json({
       ok: false,
-      msg: "Algio salió mal al buscar los signos vitales por ID",
+      msg: "Algo salió mal al buscar los signos vitales por ID de consulta",
       error,
     });
   }
 };
 
+const obtenerSignosVistalesPorPaciente = async (req = request, res = response) => {
+  const idPaciente = req.params.id_paciente;
+  try {
+    const signosVitalesBD = await pool.query("SELECT * FROM signosvitales WHERE id_paciente = ? ORDER BY fecha DESC", [idPaciente]);
+    if (signosVitalesBD.length === 0) {
+      console.log(signosVitalesBD);
+      return res.json(signosVitalesBD);
+    } else {
+      console.log(signosVitalesBD);
+      return res.json(signosVitalesBD[0]);
+    }
+  } catch (error) {
+    return res.status(500).json({
+      ok: false,
+      msg: "Algo salió mal al buscar los signos vitales por ID de paciente",
+      error,
+    });
+  }
+};
 module.exports = {
   crearSignosVitales,
-  obtenerSignosVitales,
+  obtenerSignosVitalesPorConsulta,
+  obtenerSignosVistalesPorPaciente,
 };
