@@ -36,10 +36,17 @@ const joinTablaSignosVitales = async (fecha, zona) => {
 
 const joinTablaMedicina = async (id_usuario_atencion, fecha) => {
   return `
-    SELECT concat(p.nombre, p.apellido) "nombre_paciente",p.nombre_social,p.rut,c.hora,c.estado 
+    SELECT concat(p.nombre," ", p.apellido) "nombre_paciente",p.nombre_social,p.rut,c.hora,c.estado, c.id_consulta
     FROM consulta c, pacientes p 
     WHERE c.id_usuario_atencion = '${id_usuario_atencion}' and c.fecha = '${fecha}' and c.id_paciente = p.rut 
   `;
+};
+
+const joinTablaAtencionUsuarios = async (rut_paciente) => {
+  return `
+  SELECT am.*, CONCAT(us.nombre," ",us.apellido) nombre_profesional, us.sexo as sexo_profesional
+  FROM atencion_mgeneral am, usuario us 
+  WHERE am.id_doctor = us.rut and am.rut_paciente = '${rut_paciente}' `;
 };
 module.exports = {
   joinDatosTablaCitas,
@@ -47,4 +54,5 @@ module.exports = {
   joinTablaCitasEstados,
   joinTablaSignosVitales,
   joinTablaMedicina,
+  joinTablaAtencionUsuarios,
 };
