@@ -48,6 +48,15 @@ const joinTablaAtencionUsuarios = async (rut_paciente) => {
   FROM atencion_mgeneral am, usuario us 
   WHERE am.id_doctor = us.rut and am.rut_paciente = '${rut_paciente}' `;
 };
+
+const joinTablaUsuarioCita = async (id_cita) => {
+  return `
+  SELECT am.*, CONCAT(us.nombre," ",us.apellido), us.sexo 
+  FROM atencion_mgeneral am, usuario us 
+  WHERE am.id_cita = ${id_cita} and us.rut = am.id_doctor
+  `;
+};
+
 module.exports = {
   joinDatosTablaCitas,
   joinDatosFormulario,
@@ -55,4 +64,5 @@ module.exports = {
   joinTablaSignosVitales,
   joinTablaMedicina,
   joinTablaAtencionUsuarios,
+  joinTablaUsuarioCita,
 };

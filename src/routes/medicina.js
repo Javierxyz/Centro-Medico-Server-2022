@@ -1,7 +1,13 @@
 const express = require("express");
 const router = express.Router();
 
-const { obtenerCitasMedicaPorRutFecha, buscarDiagnosticoCIE, crearDiagnostico, obtenerAtencionesPorRut } = require("../controllers/medicina");
+const {
+  obtenerCitasMedicaPorRutFecha,
+  buscarDiagnosticoCIE,
+  crearDiagnostico,
+  obtenerAtencionesPorRut,
+  obtenerAtencionPorCita,
+} = require("../controllers/medicina");
 
 router.post("/new", crearDiagnostico);
 
@@ -13,5 +19,7 @@ router.get("/cie10/:termino_busqueda", buscarDiagnosticoCIE);
 router.get("/antecedentes/:id_paciente", obtenerAntecedentesPorRut);
 
 router.get("/atenciones/:id_paciente", obtenerAtencionesPorRut);
+
+router.get("/atenciones/cita/:id_cita", obtenerAtencionPorCita);
 
 module.exports = router;

@@ -1,6 +1,6 @@
 const { response, request } = require("express");
 const pool = require("../database");
-const { joinTablaMedicina, joinTablaAtencionUsuarios } = require("../helpers/queries");
+const { joinTablaMedicina, joinTablaAtencionUsuarios, joinTablaUsuarioCita } = require("../helpers/queries");
 
 const obtenerCitasMedicaPorRutFecha = async (req = request, res = response) => {
   const { id_medico, fecha } = req.params;
@@ -91,12 +91,26 @@ obtenerAtencionesPorRut = async (req = request, res = response) => {
   }
 };
 
+obtenerAtencionPorCita = async (req = request, res = response) => {
+  const { id_cita } = req.params;
+  try {
+    const consulta = await joinTablaUsuarioCita(id_cita);
+    const atencionBD = await pool.query(consulta);
+    return res.json(atencionBD[0]);
+  } catch (error) {
+    return res.status(500).json({
+      ok: false,
+      msg: "Error al obtener la atención",
+      error,
+    });
+  }
+};
+
 module.exports = {
   obtenerCitasMedicaPorRutFecha,
   buscarDiagnosticoCIE,
   crearDiagnostico,
   obtenerAntecedentesPorRut,
   obtenerAtencionesPorRut,
+  obtenerAtencionPorCita,
 };
-
-// SELECT am.*, CONCAT(us.nombre," ",us.apellido) nombre_profesional, us.sexo FROM atencion_mgeneral am, usuario us WHERE am.id_doctor = us.rut and am.rut_paciente = ''
