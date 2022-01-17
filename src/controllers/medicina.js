@@ -36,6 +36,7 @@ const buscarDiagnosticoCIE = async (req = request, res = response) => {
 
 const crearDiagnostico = async (req = request, res = response) => {
   const { antecedentes, atencion } = req.body;
+  const { id_cita } = atencion;
   /**Transforma en string los array de antecedente */
   antecedentes.morb_ad = antecedentes.morb_ad.toString();
   antecedentes.drogas_ad = antecedentes.drogas_ad.toString();
@@ -48,6 +49,7 @@ const crearDiagnostico = async (req = request, res = response) => {
   try {
     await pool.query("INSERT INTO antecedentes_adultos SET ?", [antecedentes]);
     await pool.query("INSERT INTO atencion_mgeneral SET ?", [atencion]);
+    await pool.query("UPDATE consulta SET estado = 'atendida' WHERE id_consulta = ?", [id_cita]);
     return res.json({
       ok: true,
       msg: "Se ingresaron los antecedentes y atención con éxito",
@@ -106,6 +108,37 @@ obtenerAtencionPorCita = async (req = request, res = response) => {
   }
 };
 
+crearCertificado = async (req = request, res = response) => {
+  const { certificado } = req.body;
+  try {
+    await pool.query("INSERT INTO certificados SET ?", [certificado]);
+    return res.json({
+      ok: true,
+      msg: "Certificado creado de forma exitosa",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      ok: false,
+      msg: "Error al crear certificado",
+      error,
+    });
+  }
+};
+
+obtenerCertificadosPorRut = async (req = request, res = response) => {
+  const { id_paciente } = req.params;
+  try {
+    const certificadosBD = await pool.query("SELECT * FROM certificados WHERE id_paciente = ?", [id_paciente]);
+    return res.json(certificadosBD);
+  } catch (error) {
+    return res.status(500).json({
+      ok: false,
+      msg: "Error al obtener los certificados",
+      error,
+    });
+  }
+};
+
 module.exports = {
   obtenerCitasMedicaPorRutFecha,
   buscarDiagnosticoCIE,
@@ -113,4 +146,6 @@ module.exports = {
   obtenerAntecedentesPorRut,
   obtenerAtencionesPorRut,
   obtenerAtencionPorCita,
+  obtenerCertificadosPorRut,
+  crearCertificado,
 };

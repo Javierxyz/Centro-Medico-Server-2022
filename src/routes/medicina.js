@@ -7,6 +7,8 @@ const {
   crearDiagnostico,
   obtenerAtencionesPorRut,
   obtenerAtencionPorCita,
+  obtenerCertificadosPorRut,
+  crearCertificado,
 } = require("../controllers/medicina");
 
 router.post("/new", crearDiagnostico);
@@ -21,5 +23,9 @@ router.get("/antecedentes/:id_paciente", obtenerAntecedentesPorRut);
 router.get("/atenciones/:id_paciente", obtenerAtencionesPorRut);
 
 router.get("/atenciones/cita/:id_cita", obtenerAtencionPorCita);
+
+router.post("/certificados/new", crearCertificado);
+
+router.get("/certificados/:id_paciente", obtenerCertificadosPorRut);
 
 module.exports = router;
