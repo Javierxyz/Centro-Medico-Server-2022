@@ -1,6 +1,12 @@
 const { response, request } = require("express");
+const res = require("express/lib/response");
 const pool = require("../database");
-const { obtenerCitasPorSemestre } = require("../helpers/semestres-citas");
+const {
+  obtenerCantidadPorSexoDia,
+  obtenerCantidadPorTipoDia,
+  obtenerProcedimientosPorFecha,
+  obtenerEspecialidadesPorFecha,
+} = require("../helpers/queries-estadistica");
 
 const dashboardDatosTarjetas = async (req = request, res = response) => {
   try {
@@ -39,9 +45,97 @@ const citasSemestre = async (req = request, res = response) => {
       error,
     });
   }
-  return res.json(mesesQuery);
 };
+
+const citasPorDia = async (req = request, res = response) => {
+  const { fecha } = req.params;
+  try {
+    const citasBD = await pool.query("SELECT * FROM consulta WHERE fecha = ?", [fecha]);
+    return res.json(citasBD);
+  } catch (error) {
+    return res.status(500).json({
+      ok: false,
+      msg: "Error al buscar las citas del día",
+      error,
+    });
+  }
+};
+
+const estadisticasDelDia = async (req = request, res = response) => {
+  const { fecha } = req.params;
+  try {
+    /**Declaración de objetos */
+    const medicina_adulto = {};
+    const pediatricas = {};
+
+    /**Medicina General*/
+    const consultaSexoMG = await obtenerCantidadPorSexoDia("medicina_general", fecha);
+    const consultaTipoMG = await obtenerCantidadPorTipoDia("medicina_general", fecha);
+    const sexoBD = await pool.query(consultaSexoMG);
+    const tipoBD = await pool.query(consultaTipoMG);
+    medicina_adulto.tabla = "medicina_adulto";
+    medicina_adulto.control = tipoBD[0].cantidad;
+    medicina_adulto.ingreso = tipoBD[1].cantidad;
+    medicina_adulto.mujer = sexoBD[0].cantidad;
+    medicina_adulto.hombre = sexoBD[1].cantidad;
+    medicina_adulto.nsp = sexoBD[2].cantidad;
+
+    /**Pediatría*/
+    const consultaSexoP = await obtenerCantidadPorSexoDia("pediatria", fecha);
+    const consultaTipoP = await obtenerCantidadPorTipoDia("pediatria", fecha);
+    const sexoP = await pool.query(consultaSexoP);
+    const tipoP = await pool.query(consultaTipoP);
+    pediatricas.tabla = "pediatricas";
+    pediatricas.control = tipoP[0].cantidad;
+    pediatricas.ingreso = tipoP[1].cantidad;
+    pediatricas.mujer = sexoP[0].cantidad;
+    pediatricas.hombre = sexoP[1].cantidad;
+    pediatricas.nsp = sexoP[2].cantidad;
+    return res.json([medicina_adulto, pediatricas]);
+  } catch (error) {
+    return res.status(500).json({
+      ok: false,
+      msg: "Algo salió mal en estadísticas por día",
+      error,
+    });
+  }
+};
+
+const estadisticasDeProcedimientos = async (req = request, res = response) => {
+  const { fecha } = req.params;
+  try {
+    const query = await obtenerProcedimientosPorFecha(fecha);
+    const procBD = await pool.query(query);
+    return res.json(procBD);
+  } catch (error) {
+    return res.status(500).json({
+      ok: false,
+      msg: "Algo salió mal en la obtención de procedimientos",
+      error,
+    });
+  }
+};
+
+const estadisticasDeEspecialidades = async (req = request, res = response) => {
+  const { fecha } = req.params;
+  try {
+    const query = await obtenerEspecialidadesPorFecha(fecha);
+    const espBD = await pool.query(query);
+    return res.json(espBD);
+  } catch (error) {
+    return res.status(500).json({
+      ok: false,
+      msg: "Algo salió mal en la obtención de procedimientos",
+      error,
+    });
+  }
+};
+
 module.exports = {
   dashboardDatosTarjetas,
   citasSemestre,
+  citasPorDia,
+  estadisticasDelDia,
+  estadisticasDeProcedimientos,
+  estadisticasDeEspecialidades,
 };
