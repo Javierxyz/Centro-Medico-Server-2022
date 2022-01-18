@@ -61,6 +61,13 @@ const agendarCitasPorId = async (req = request, res = response) => {
     });
   }
   try {
+    const citaCheck = await pool.query("SELECT * FROM consulta WHERE id_consulta = ?", [id_consulta]);
+    if (citaCheck[0].estado === "atendida") {
+      return res.status(500).json({
+        ok: false,
+        msg: "No se puede cambiar una cita ya atendida",
+      });
+    }
     await pool.query("UPDATE consulta SET hora = ?, lugar_atencion = ?, estado = 'agendada' WHERE id_consulta = ?", [
       hora,
       lugar_atencion,

@@ -1,6 +1,6 @@
 const { response, request } = require("express");
 const pool = require("../database");
-const { joinTablaMedicina, joinTablaAtencionUsuarios, joinTablaUsuarioCita } = require("../helpers/queries");
+const { joinTablaMedicina, joinTablaAtencionUsuarios, joinTablaUsuarioCita, busquedaCie10 } = require("../helpers/queries");
 
 const obtenerCitasMedicaPorRutFecha = async (req = request, res = response) => {
   const { id_medico, fecha } = req.params;
@@ -20,9 +20,8 @@ const obtenerCitasMedicaPorRutFecha = async (req = request, res = response) => {
 const buscarDiagnosticoCIE = async (req = request, res = response) => {
   const { termino_busqueda } = req.params;
   try {
-    const diagnosticosDB = await pool.query(
-      `SELECT dc.descripcion as nombre FROM diagnosticoscie10 dc WHERE dc.descripcion LIKE '%${termino_busqueda}%'`
-    );
+    const diagnosticoQuery = await busquedaCie10(termino_busqueda);
+    const diagnosticosDB = await pool.query(diagnosticoQuery);
     console.log(diagnosticosDB);
     return res.json(diagnosticosDB);
   } catch (error) {

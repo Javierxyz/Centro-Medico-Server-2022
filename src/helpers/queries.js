@@ -51,10 +51,28 @@ const joinTablaAtencionUsuarios = async (rut_paciente) => {
 
 const joinTablaUsuarioCita = async (id_cita) => {
   return `
-  SELECT am.*, CONCAT(us.nombre," ",us.apellido), us.sexo 
-  FROM atencion_mgeneral am, usuario us 
-  WHERE am.id_cita = ${id_cita} and us.rut = am.id_doctor
+  SELECT am.*,
+  CONCAT(us.nombre," ",us.apellido) nombre_profesional, us.sexo, us.rut as usuario_rut,
+  CONCAT(p.nombre," ", p.apellido)  nombre_paciente, p.rut as rut_paciente, p.fecha_nacimiento,
+  s.peso, s.talla, s.ccintura, s.pulso, s.sat, s.pam, s.temp, s.fresp, s.imc, s.estado_nutri
+  FROM atencion_mgeneral am, usuario us, pacientes p, signosvitales s
+  WHERE am.id_cita = ${id_cita} and us.rut = am.id_doctor and am.rut_paciente = p.rut and am.id_cita = s.id_consulta
   `;
+};
+
+const busquedaCie10 = (term) => {
+  const terminos = term.split(" ");
+  let consulta = "";
+  //contar términos
+  consulta = `SELECT dc.descripcion as nombre FROM diagnosticoscie10 dc WHERE dc.descripcion LIKE '%${terminos[0]}%'`;
+  const termLeng = terminos.length;
+  if (termLeng > 1) {
+    for (i = 1; i < termLeng; i++) {
+      //concatenar nuevo término
+      consulta = consulta + ` and dc.descripcion LIKE '%${terminos[i]}%`;
+    }
+  }
+  return consulta;
 };
 
 module.exports = {
@@ -65,4 +83,5 @@ module.exports = {
   joinTablaMedicina,
   joinTablaAtencionUsuarios,
   joinTablaUsuarioCita,
+  busquedaCie10,
 };
