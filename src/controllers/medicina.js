@@ -40,6 +40,11 @@ const crearDiagnostico = async (req = request, res = response) => {
   antecedentes.morb_ad = antecedentes.morb_ad.toString();
   antecedentes.drogas_ad = antecedentes.drogas_ad.toString();
 
+  /**Trasnforma la info de FUR */
+  if (antecedentes.fur !== "") {
+    antecedentes.fur_ad = `${antecedentes.fur_ad.year}-${antecedentes.fur_ad.month}-${antecedentes.fur_ad.day}`;
+  }
+
   /**Trasnforma en string los array de objetos de atención */
   atencion.planest_ad = JSON.stringify(atencion.planest_ad);
   atencion.med_ad = JSON.stringify(atencion.med_ad);

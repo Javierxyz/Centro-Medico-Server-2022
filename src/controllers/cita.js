@@ -106,7 +106,7 @@ const estadisticaCitas = async (req = request, res = response) => {
   try {
     const estadistica = { cantidad_citas: 0, cantidad_paciente: 0 };
     const citasDB = await pool.query("SELECT COUNT(c.id_consulta) 'cantidad_citas' FROM consulta c");
-    const pacientesDB = await pool.query("SELECT COUNT(p.id_paciente) 'cantidad_pacientes' FROM pacientes p");
+    const pacientesDB = await pool.query("SELECT COUNT(p.rut) 'cantidad_pacientes' FROM pacientes p");
     estadistica.cantidad_citas = citasDB[0].cantidad_citas;
     estadistica.cantidad_pacientes = pacientesDB[0].cantidad_pacientes;
     return res.json(estadistica);

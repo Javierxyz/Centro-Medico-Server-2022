@@ -7,6 +7,7 @@ const {
   obtenerProcedimientosPorFecha,
   obtenerEspecialidadesPorFecha,
 } = require("../helpers/queries-estadistica");
+const { obtenerCitasPorSemestre } = require("../helpers/semestres-citas");
 
 const dashboardDatosTarjetas = async (req = request, res = response) => {
   try {
@@ -37,6 +38,7 @@ const citasSemestre = async (req = request, res = response) => {
       bdRes = await pool.query(mesesQuery[i]);
       cantidad[i] = bdRes[0];
     }
+    console.log(bdRes);
     return res.json(cantidad);
   } catch (error) {
     return res.status(500).json({
