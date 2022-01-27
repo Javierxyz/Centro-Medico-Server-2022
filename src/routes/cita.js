@@ -30,7 +30,7 @@ router.put("/confirmar", confirmarCita);
 router.put("/asistida", confirmarAsistencia);
 
 /**Obtener cita por ID */
-router.get("/id/:cita_id", obtenerCitaPorId);
+router.get("/id/:id_consulta", obtenerCitaPorId);
 
 /**Obtener citas durante una fecha determinada */
 router.get("/:fecha", obtenerCitasPorFecha);

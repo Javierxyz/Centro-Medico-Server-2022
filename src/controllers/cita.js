@@ -189,10 +189,12 @@ const confirmarAsistencia = async (req = request, res = response) => {
 };
 
 const obtenerCitaPorId = async (req = request, res = response) => {
-  const { id_consulta } = req.body;
+  const { id_consulta } = req.params;
+  console.log(id_consulta);
   try {
     const citaBD = await pool.query("SELECT * FROM consulta c WHERE c.id_consulta = ?", [id_consulta]);
-    return res.json(citaBD);
+    console.log(citaBD);
+    return res.json(citaBD[0]);
   } catch (error) {
     return res.status(500).json({
       ok: false,

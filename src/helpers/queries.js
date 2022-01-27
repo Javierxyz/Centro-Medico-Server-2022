@@ -71,6 +71,8 @@ const busquedaCie10 = (term) => {
       //concatenar nuevo término
       consulta = consulta + ` and dc.descripcion LIKE '%${terminos[i]}%`;
     }
+  } else {
+    consulta = `SELECT dc.descripcion as nombre FROM diagnosticoscie10 dc WHERE dc.descripcion LIKE '%${terminos[0]}%' or dc.clave LIKE '%${terminos[0]}%'`;
   }
   return consulta;
 };

@@ -4,7 +4,7 @@ const obtenerCantidadPorSexoDia = (especialidad, dia) => {
   UNION 
   select 'hombre', count(*) cantidad from consulta c, pacientes p where c.id_paciente = p.rut and p.sexo = 'hombre' and c.fecha = '${dia}' and c.area_medica = '${especialidad}' and c.estado <> 'creada' 
   UNION 
-  select 'nsp', count(*) cantidad from consulta c, pacientes p WHERE c.estado = 'creada' and c.fecha = '${dia}' and c.area_medica = '${especialidad}'
+  select 'nsp', count(*) cantidad from consulta c WHERE c.estado = 'creada' and c.fecha = '${dia}' and c.area_medica = '${especialidad}'
   `;
 };
 

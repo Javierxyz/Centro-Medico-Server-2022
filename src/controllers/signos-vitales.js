@@ -31,7 +31,7 @@ const crearSignosVitales = async (req = request, res = response) => {
 const obtenerSignosVitalesPorConsulta = async (req = request, res = response) => {
   const idConsulta = req.params.id_consulta;
   try {
-    const signosVitalesDB = await pool.query("SELECT * FROM signosvitales WHERE id_consulta = ?", [idConsulta]);
+    const signosVitalesDB = await pool.query("SELECT * FROM signosvitales WHERE id_consulta = ? ORDER BY id_signosvitales DESC", [idConsulta]);
     return res.json(signosVitalesDB[0]);
   } catch (error) {
     return res.status(500).json({
@@ -45,12 +45,10 @@ const obtenerSignosVitalesPorConsulta = async (req = request, res = response) =>
 const obtenerSignosVistalesPorPaciente = async (req = request, res = response) => {
   const idPaciente = req.params.id_paciente;
   try {
-    const signosVitalesBD = await pool.query("SELECT * FROM signosvitales WHERE id_paciente = ? ORDER BY fecha DESC", [idPaciente]);
+    const signosVitalesBD = await pool.query("SELECT * FROM signosvitales WHERE id_paciente = ? ORDER BY fecha,id_signosvitales DESC", [idPaciente]);
     if (signosVitalesBD.length === 0) {
-      console.log(signosVitalesBD);
       return res.json(signosVitalesBD);
     } else {
-      console.log(signosVitalesBD);
       return res.json(signosVitalesBD[0]);
     }
   } catch (error) {

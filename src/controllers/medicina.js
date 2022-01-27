@@ -37,12 +37,12 @@ const crearDiagnostico = async (req = request, res = response) => {
   const { antecedentes, atencion } = req.body;
   const { id_cita } = atencion;
   /**Transforma en string los array de antecedente */
-  antecedentes.morb_ad = antecedentes.morb_ad.toString();
-  antecedentes.drogas_ad = antecedentes.drogas_ad.toString();
+  antecedentes.morb = antecedentes.morb.toString();
+  antecedentes.drogas = antecedentes.drogas.toString();
 
   /**Trasnforma la info de FUR */
-  if (antecedentes.fur !== "") {
-    antecedentes.fur_ad = `${antecedentes.fur_ad.year}-${antecedentes.fur_ad.month}-${antecedentes.fur_ad.day}`;
+  if (antecedentes.fecha_ult_regla !== "") {
+    antecedentes.fecha_ult_regla = `${antecedentes.fecha_ult_regla.year}-${antecedentes.fecha_ult_regla.month}-${antecedentes.fecha_ult_regla.day}`;
   }
 
   /**Trasnforma en string los array de objetos de atención */
