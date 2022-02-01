@@ -2,7 +2,9 @@ const obtenerCitasPorSemestre = async (fecha) => {
   const semestre = [];
   const consultas = [];
   const fechaTemp = fecha.split("-");
-  if (fechaTemp[1] <= 6) {
+  const mesInt = parseInt(fechaTemp[1]);
+  console.log(mesInt);
+  if (mesInt <= 6) {
     for (let i = 1; i <= 6; i++) {
       semestre.push({ inicio: `${fechaTemp[0]}-0${i}-01`, fin: `${fechaTemp[0]}-0${i}-31` });
     }
