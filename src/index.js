@@ -33,6 +33,7 @@ app.use("/api/estadistica", require("./routes/estadistica"));
 app.use("/api/territorio", require("./routes/territorio"));
 app.use("/api/signosvitales", require("./routes/signos-vitales"));
 app.use("/api/medicina", require("./routes/medicina"));
+app.use("/api/areas", require("./routes/area"));
 
 /**Levantar el servidor */
 app.listen(app.get("port"), () => {
