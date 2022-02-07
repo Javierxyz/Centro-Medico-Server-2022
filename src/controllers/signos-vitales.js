@@ -45,7 +45,7 @@ const obtenerSignosVitalesPorConsulta = async (req = request, res = response) =>
 const obtenerSignosVistalesPorPaciente = async (req = request, res = response) => {
   const idPaciente = req.params.id_paciente;
   try {
-    const signosVitalesBD = await pool.query("SELECT * FROM signosvitales WHERE id_paciente = ? ORDER BY fecha,id_signosvitales DESC", [idPaciente]);
+    const signosVitalesBD = await pool.query("SELECT * FROM signosvitales WHERE id_paciente = ? ORDER BY id_signosvitales DESC", [idPaciente]);
     if (signosVitalesBD.length === 0) {
       return res.json(signosVitalesBD);
     } else {
